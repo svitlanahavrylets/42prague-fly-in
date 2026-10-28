@@ -1,0 +1,15 @@
+# Security
+.env
+
+# Virtual environments
+matrix_env/
+venv/
+.venv/
+test_env/
+
+# Python cache
+__pycache__/
+
+# Type checker & test cache
+.mypy_cache/
+.pytest_cache/
