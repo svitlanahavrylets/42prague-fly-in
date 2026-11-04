@@ -5,6 +5,8 @@ RESET = \\033[0m
 
 UV      = uv
 PYTHON  = $(UV) run python
+FILE   ?= my_maps/example.txt
+
 
 all: install
 
@@ -13,7 +15,7 @@ install:
 
 run:
 		@if [ ! -d ".venv" ]; then make install; fi
-		$(PYTHON) main.py
+		$(PYTHON) main.py -m src $(FILE)
 
 debug:
 		$(UV) run python -m pdb main.py 

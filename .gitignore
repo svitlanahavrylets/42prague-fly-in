@@ -13,3 +13,8 @@ __pycache__/
 # Type checker & test cache
 .mypy_cache/
 .pytest_cache/
+
+# AI Assistant configs
+AGENTS.md
+.codex/
+.copilot/

@@ -1,5 +1,4 @@
 from pydantic import BaseModel, Field
-from typing import Any, Optional
 from enum import Enum
 
 
@@ -31,6 +30,10 @@ class Zone(BaseModel):
         default=1, 
         ge=1,
         description="Maximum drones that can occupy this zone simultaneously"
+    )
+    current_drones: list[int] = Field(
+        default_factory=list,
+        description="List of drone IDs currently occupying this zone"
     )
     color: str | None = Field(
         default=None,
