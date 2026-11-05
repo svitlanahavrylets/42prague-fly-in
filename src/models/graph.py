@@ -21,8 +21,7 @@ class Graph(BaseModel):
         description="Name of the unique end_hub"
     )
 
-    def get_neighbors(self, zone_name: str) -> 
-        list[tuple[Zone, Connection, int]]:
+    def get_neighbors(self, zone_name: str) -> list[tuple[Zone, Connection, int]]:
         """Return a list of tuples for accessible neighbors:
         (target_zone, connection_used, movement_cost)
         Filters out BLOCKED zones."""

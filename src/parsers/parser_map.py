@@ -9,9 +9,7 @@ RED = "\033[91m"
 RESET = "\033[0m"
 
 
-map_path = Path('my_maps/example.txt')
-
-class MapParser():
+class MapParser:
     def __init__(self, map_path: Path) -> None:
         self.map_path = map_path
     
@@ -211,12 +209,12 @@ class MapParser():
 
 
 
-test_parse = MapParser(map_path)
+# test_parse = MapParser(map_path)
 
 
 
 
 
-print(f"test_parse = {test_parse.parse_map()}\n")
+# print(f"test_parse = {test_parse.parse_map()}\n")
 
 # print(f"parse_data = {test_parse.read_map_file()}")

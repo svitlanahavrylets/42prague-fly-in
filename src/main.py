@@ -2,6 +2,7 @@ import sys
 import argparse
 from pathlib import Path
 from src.parsers.parser_map import MapParser
+from src.algorithms.collision_manager import CollisionManager
 
 RED = "\033[91m"
 RESET = "\033[0m"
@@ -26,7 +27,28 @@ def main() -> None:
     try:
         print(f"Loading map from: {args.map}")
         parser = MapParser(args.map)
-        graph, nb_drones = parser.parse()
+        graph, nb_drones = parser.parse_map()
+
+        cm = CollisionManager(graph)
+
+        print(f"-------------before-----------")
+        print(f"is_free roof1 in turn 1 => {cm.is_zone_free('roof1', 1)}")
+        print(f"_zone_occupancy => {cm._zone_occupancy.get(('roof1', 1), 0)}")
+        print()
+        print(f"reserve_zone => {cm.reserve_zone('roof1', 1)}")
+        print(f"is_free roof1 in turn 1 after reservation => {cm.is_zone_free('roof1', 1)}")
+        print(f"_zone_occupancy after reservation => {cm._zone_occupancy.get(('roof1', 1), 0)}")
+        print()
+        print(f"reserve_zone => {cm.reserve_zone('roof1', 1)}")
+        print(f"is_free roof1 in turn 1 again => {cm.is_zone_free('roof1', 1)}")
+        print(f"is_free roof1 in turn 2 after reservation => {cm.is_zone_free('roof1', 2)}")
+        print(f"_zone_occupancy after reservation => {cm._zone_occupancy.get(('roof1', 2), 0)}")
+        print()
+
+
+
+
+
 
     except FileNotFoundError as e:
         print(f"{RED}Error: Map file not found. "
