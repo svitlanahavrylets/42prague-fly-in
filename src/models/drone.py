@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field
 
 
 class Drone(BaseModel):
+    """Represents an individual drone unit in the simulation."""
     id: int = Field( 
         ge=1,
         description="A unique name of drone"
@@ -22,3 +23,26 @@ class Drone(BaseModel):
         default=False,
         description="True if the drone has reached end_hub and is delivered"
     )
+    path: list[tuple[str, int]] = Field(
+        default_factory=list,
+        description="Planned space-time path as (zone_name, turn) steps"
+    )
+
+    @classmethod
+    def create_fleet(cls, count: int, start_location: str) -> list["Drone"]:
+        """Factory method to generate a fleet of drones initialized at the start location."""
+        return [
+            cls(id=i + 1, current_zone=start_location)
+            for i in range(count)
+        ]
+
+    def get_position_at_turn(self, turn: int) -> str | None:
+        """
+        Returns the zone name where the drone is scheduled to be at a specific turn.
+        Returns None if no move is registered for this turn.
+        """
+        for zone_name, t in self.path:
+            if t == turn:
+                return zone_name
+        return None
+    
