@@ -2,6 +2,7 @@ from src.models.graph import Graph
 from src.models.connection import Connection
 
 
+
 class CollisionManager:
     """Manages space-time reservations for zones and connections across turns."""  
 
@@ -51,5 +52,18 @@ class CollisionManager:
         else:
             raise ValueError(f"Connection {conn_id} is occupied")
     
+    def register_path(self, path: list[tuple[str, int]]) -> None:
+        """Registers all zones and links used in a path across time."""
+        for i in range(len(path)):
+            zone_name, turn = path[i]
+            zone = self.graph.zones[zone_name]
+            if not zone.is_start and not zone.is_end:
+                self.reserve_zone(zone_name, turn)
 
-# print(f"zone_name => {CollisionManager.is_zone_free("hub:", 1)}")
+            if i < len(path) - 1:
+                next_zone_name, next_turn = path[i + 1]
+                if zone_name != next_zone_name: 
+                    conn = self.graph.get_connection(zone_name, next_zone_name)
+                    if conn:
+                        for t in range(turn + 1, next_turn + 1):
+                            self.reserve_link(conn, t)

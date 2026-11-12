@@ -1,4 +1,5 @@
 import heapq
+from collections import deque
 from ..models.graph import Graph
 from .collision_manager import CollisionManager
 
@@ -7,17 +8,44 @@ class CooperativeAStar:
         self,
         graph: Graph,
         collision_manager: CollisionManager,
-        max_turns: int = 500
+        max_turns: int = 1000
     ) -> None:
         self.graph = graph
         self.cm = collision_manager
         self.max_turns = max_turns
+        self.distances = self._calculate_static_distances(
+            graph.end_zone_name
+        )
 
-    def _heuristic(self, zone_a: str, zone_end: str) -> float:
-        zone_a = self.graph.zones[zone_a]
-        zone_end = self.graph.zones[zone_end]
-        h = abs(zone_a.x - zone_end.x) + abs(zone_a.y - zone_end.y)
-        return float(h)
+    def _calculate_static_distances(
+        self, 
+        target_zone: str
+    ) -> dict[str, float]:
+        """Calculates minimum hops from target_zone to 
+        all other zones using simple BFS."""
+        distances: dict[str, float] = {target_zone: 0.0}
+        queue = deque([target_zone])
+        print(f"queue => {queue}")
+
+        while queue:
+            current = queue.popleft()
+            print(f"current => {current}")
+
+            for neighbor, _, _ in self.graph.get_neighbors(current):
+                print(f"neighbor => {neighbor}")
+                if neighbor.name not in distances:
+                    distances[neighbor.name] = distances[current] + 1.0
+                    queue.append(neighbor.name)
+                    print(f"queue2 => {queue}")
+        print(f"distances => {distances}")
+
+        return distances
+
+
+
+    def _heuristic(self, zone_a: str) -> float:
+        """Returns the precalculated minimum hops to the target zone."""
+        return self.distances.get(zone_a, 0.0)
 
     def _generate_valid_neighbors(
         self,
@@ -40,9 +68,11 @@ class CooperativeAStar:
         for neighbors_zone, conn, cost in self.graph.get_neighbors(current_zone):
             arrival_turn = turn + cost
 
-            is_zone_free = self.cm.is_zone_free(neighbors_zone.name, turn + cost)
-            is_link_free = self.cm.is_link_free(conn,  turn + 1)
-            # print(f"neighbors_zone {neighbors_zone}, conn {conn}, cost{cost}")
+            is_zone_free = self.cm.is_zone_free(neighbors_zone.name, arrival_turn)
+            is_link_free = all(
+                self.cm.is_link_free(conn, t) 
+                for t in range(turn + 1, arrival_turn + 1)
+            )
 
             if is_zone_free and is_link_free:
                 move_g = g_cost + float(cost)
@@ -54,19 +84,20 @@ class CooperativeAStar:
 
     def plan_route(
         self,
+        start_turn: int,
         start_zone_name: str,
         end_zone_name: str
     ) -> list[tuple[str, int]] | None:
-        """Finds a collision-free path for a single drone 
-        from start_zone_name to end_zone_name."""
+        """Finds a collision-free path for a single
+        drone starting at start_turn."""
         f_score = self._heuristic(start_zone_name, end_zone_name)
-        start_path = [(start_zone_name, 0)]
+        start_path = [(start_zone_name, start_turn)]
 
         count = 0
         open_set: list[
-            tuple[float, float, int, str, list[tuple[str, int]]]
+            tuple[float, int, float, int, str, list[tuple[str, int]]]
         ] = [
-        (f_score, count, 0.0, 0, start_zone_name, start_path)
+        (f_score, count, 0.0, start_turn, start_zone_name, start_path)
         ]
 
         visited: set[tuple[str, int]] = set()

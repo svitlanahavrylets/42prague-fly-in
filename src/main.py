@@ -33,51 +33,24 @@ def main() -> None:
 
         drones = Drone.create_fleet(nb_drones, graph.start_zone_name)
         print(f"drones => {drones}")
-
         cm = CollisionManager(graph)
-        print("\n------------algorithms-----------")
-        algorithms = CooperativeAStar(graph, cm, )
+        algorithms = CooperativeAStar(graph, cm)
 
-        cas = algorithms._heuristic("hub", "goal")
-        print(f" def _heuristic => {cas}")
+        for drone in drones:
+            print(f"drone => {drone}")
+            
+            start_turn = 0
+            path = algorithms.plan_route(
+                start_turn, graph.start_zone_name, graph.end_zone_name
+            )
+            print(f"path => {path}")
+            if path is None:
+                raise ValueError(f"Path for Drone {drone.id!r} does not exist")
+                break
 
-        generate_neib = algorithms._generate_valid_neighbors(
-            graph.start_zone_name,
-            0,
-            0.0,
-            graph.end_zone_name,
-            [(graph.start_zone_name, 0)]
-        )
-
-        print("\n------------def _generate_valid_neighbors(-----------")
-        print(f"{generate_neib}")
-        print("\n--- generated neighbors path ---")
-        for item in generate_neib:
-            f_score, g_cost, turn, zone, path = item
-            print(f"Zone: {zone}, Turn: {turn}, f_cost: {f_score}, Path: {path}")
-
-        print(f"\n----------plan_route--------------")
-        plan_route = algorithms.plan_route(graph.start_zone_name, graph.end_zone_name)
-        print(f" plan_route => {plan_route}")
-
-        print(f"\n-------------before-----------")
-        print(f"is_free roof1 in turn 1 => {cm.is_zone_free('roof1', 1)}")
-        print(f"_zone_occupancy => {cm._zone_occupancy.get(('roof1', 1), 0)}")
-        print()
-        print(f"reserve_zone => {cm.reserve_zone('roof1', 1)}")
-        print(f"is_free roof1 in turn 1 after reservation => {cm.is_zone_free('roof1', 1)}")
-        print(f"_zone_occupancy after reservation => {cm._zone_occupancy.get(('roof1', 1), 0)}")
-        print()
-        print(f"reserve_zone => {cm.reserve_zone('roof1', 1)}")
-        print(f"is_free roof1 in turn 1 again => {cm.is_zone_free('roof1', 1)}")
-        print(f"is_free roof1 in turn 2 after reservation => {cm.is_zone_free('roof1', 2)}")
-        print(f"_zone_occupancy after reservation => {cm._zone_occupancy.get(('roof1', 2), 0)}")
-        print()
-
-
-
-
-
+            drone.path = path
+            cm.register_path(path)
+            print(f"✅ {drone.id}: {path}")
 
     except FileNotFoundError as e:
         print(f"{RED}Error: Map file not found. "

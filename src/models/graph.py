@@ -49,4 +49,13 @@ class Graph(BaseModel):
             
         return neighbors
 
+    def get_connection(self, zone_a: str, zone_b: str) -> Connection | None:
+        """Find the Connection object between two directly connected zones."""
+        for conn in self.connections:
+            if (conn.zones[0] == zone_a and conn.zones[1] == zone_b) or (
+                conn.zones[0] == zone_b and conn.zones[1] == zone_a
+            ):
+                return conn
+        return None
+
 
