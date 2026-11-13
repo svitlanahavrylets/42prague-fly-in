@@ -1,13 +1,15 @@
 import sys
 import argparse
 from pathlib import Path
-from src.parsers.parser_map import MapParser
-from src.models.drone import Drone
-from src.algorithms.collision_manager import CollisionManager
-from src.algorithms.cooper_A_star import CooperativeAStar
+from .parsers import MapParser
+from .models import Drone
+from .algorithms import CollisionManager
+from .algorithms import CooperativeAStar
+from .controllers import SimulationController
 
 RED = "\033[91m"
 RESET = "\033[0m"
+
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
@@ -22,6 +24,7 @@ def parse_args() -> argparse.Namespace:
 
     )
     return parser.parse_args()
+
 
 def main() -> None:
     args = parse_args()
@@ -38,12 +41,11 @@ def main() -> None:
 
         for drone in drones:
             print(f"drone => {drone}")
-            
+
             start_turn = 0
             path = algorithms.plan_route(
                 start_turn, graph.start_zone_name, graph.end_zone_name
             )
-            print(f"path => {path}")
             if path is None:
                 raise ValueError(f"Path for Drone {drone.id!r} does not exist")
                 break
@@ -52,14 +54,20 @@ def main() -> None:
             cm.register_path(path)
             print(f"✅ {drone.id}: {path}")
 
+        print("----------simulations-----------")
+        sc = SimulationController(drones)
+        sc.run()
+
     except FileNotFoundError as e:
-        print(f"{RED}Error: Map file not found. "
-              f"{e}.{RESET}", file=sys.stderr
+        print(
+            f"{RED}Error: Map file not found. {e}.{RESET}",
+            file=sys.stderr,
         )
         sys.exit(1)
     except ValueError as e:
-        print(f"{RED}Map Format Error: "
-              f"{e}.{RESET}", file=sys.stderr
+        print(
+            f"{RED}Map Format Error: {e}.{RESET}",
+            file=sys.stderr,
         )
         sys.exit(1)
     except Exception as e:

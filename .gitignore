@@ -18,3 +18,6 @@ __pycache__/
 AGENTS.md
 .codex/
 .copilot/
+
+# Local subject reference (generated from fly-in.pdf)
+docs/

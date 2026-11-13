@@ -21,7 +21,9 @@ class Graph(BaseModel):
         description="Name of the unique end_hub"
     )
 
-    def get_neighbors(self, zone_name: str) -> list[tuple[Zone, Connection, int]]:
+    def get_neighbors(
+        self, zone_name: str
+    ) -> list[tuple[Zone, Connection, int]]:
         """Return a list of tuples for accessible neighbors:
         (target_zone, connection_used, movement_cost)
         Filters out BLOCKED zones."""
@@ -38,15 +40,15 @@ class Graph(BaseModel):
                 target_zone = self.zones[target_name]
 
                 if target_zone.zone_type == ZoneType.BLOCKED:
-                        continue
+                    continue
 
                 if target_zone.zone_type == ZoneType.RESTRICTED:
-                    cost = 2 
+                    cost = 2
                 else:
                     cost = 1
 
                 neighbors.append((target_zone, conn, cost))
-            
+
         return neighbors
 
     def get_connection(self, zone_a: str, zone_b: str) -> Connection | None:
@@ -57,5 +59,3 @@ class Graph(BaseModel):
             ):
                 return conn
         return None
-
-

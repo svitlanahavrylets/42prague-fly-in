@@ -13,7 +13,7 @@ class ZoneType(str, Enum):
 class Zone(BaseModel):
     """Reprezents a graph node (zone/hub) in the network"""
     name: str = Field(
-        min_length=1, 
+        min_length=1,
         description="Name of the zone"
     )
     x: int = Field(
@@ -27,7 +27,7 @@ class Zone(BaseModel):
         description="Type of the zone, default normal"
     )
     max_drones: int = Field(
-        default=1, 
+        default=1,
         ge=1,
         description="Maximum drones that can occupy this zone simultaneously"
     )

@@ -1,6 +1,6 @@
 import pytest
 from pydantic import ValidationError
-from src.models import Zone, ZoneType, Connection, Drone, Graph
+from ..src.models import Zone, ZoneType, Connection, Drone, Graph
 
 
 def test_zone_defaults():
@@ -22,6 +22,7 @@ def test_invalid_zone_type():
         print("invalid_zone_type")
         Zone(name="bad_hub", x=0, y=0, zone_type="unknown")
 
+
 def test_connection():
     con = Connection(zones=["hub1", "hub2"], max_link_capacity=2)
     assert con.max_link_capacity == 2
@@ -32,10 +33,12 @@ def test_invalid_zones_connection():
         print("invalid_zone_connection")
         Connection(zones=["hub1"], max_link_capacity=2)
 
+
 def test_invalid_capacity_connection():
     with pytest.raises(ValidationError):
         print("invalid_capacity_connection")
         Connection(zones=["hub1", "hub2"], max_link_capacity=-1)
+
 
 def test_drone_defaults():
     drone = Drone(id=1, current_zone="start")
@@ -66,6 +69,7 @@ def test_invalid_drone_remaining_turns():
     with pytest.raises(ValidationError):
         Drone(id=1, current_zone="start", remaining_turns=-1)
 
+
 def test_graph_creation_and_neighbors():
     z_start = Zone(name="start", x=0, y=0, is_start=True)
     hub1 = Zone(name="hub1", x=1, y=0)
@@ -75,15 +79,14 @@ def test_graph_creation_and_neighbors():
     test_con2 = Connection(zones=["hub1", "end"], current_drones_count=1)
 
     graph = Graph(
-        zones = {"start": z_start, "hub1": hub1, "end": z_end},
-        connections = [test_con1, test_con2],
-        start_zone_name = "start",
-        end_zone_name = "end",
+        zones={"start": z_start, "hub1": hub1, "end": z_end},
+        connections=[test_con1, test_con2],
+        start_zone_name="start",
+        end_zone_name="end",
     )
 
     assert graph.start_zone_name == "start"
     assert graph.end_zone_name == "end"
     assert graph.get_neighbors("hub1") == ["start", "end"]
 
-Graph.model_rebuild()
-    
+# Graph.model_rebuild()
