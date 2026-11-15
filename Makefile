@@ -15,10 +15,10 @@ install:
 
 run:
 		@if [ ! -d ".venv" ]; then make install; fi
-		$(PYTHON) -m src.main $(FILE)
+		$(PYTHON) -m main $(FILE)
 
 debug:
-		$(UV) run python -m pdb src.main.py 
+		$(UV) run python -m pdb main
 
 lint:
 		@if [ ! -d ".venv" ]; then $(MAKE) install; fi

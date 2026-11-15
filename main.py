@@ -1,35 +1,20 @@
 import sys
-import argparse
-from pathlib import Path
-from .parsers import MapParser
-from .models import Drone
-from .algorithms import CollisionManager
-from .algorithms import CooperativeAStar
-from .controllers import SimulationController
+import traceback
+
+from src.parsers import MapParser
+from src.parsers import ArgParser
+from src.models import Drone
+from src.algorithms import CollisionManager
+from src.algorithms import CooperativeAStar
+from src.controllers import SimulationController
 
 RED = "\033[91m"
 RESET = "\033[0m"
 
-
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="Fly-in: Drone routing simulation"
-    )
-    parser.add_argument(
-        "map",
-        nargs="?",
-        type=Path,
-        default=Path("my_maps/example.txt"),
-        help="Path to the default map (my_maps/example.txt)"
-
-    )
-    return parser.parse_args()
-
-
 def main() -> None:
-    args = parse_args()
 
     try:
+        args = ArgParser.parse_args()
         print(f"Loading map from: {args.map}")
         parser = MapParser(args.map)
         graph, nb_drones = parser.parse_map()
@@ -55,23 +40,34 @@ def main() -> None:
             print(f"✅ {drone.id}: {path}")
 
         print("----------simulations-----------")
-        sc = SimulationController(drones)
-        sc.run()
+        controller = SimulationController(drones)
+        controller.run()
+
+        if args.visual == "pygame":
+            from src.visualizers.pygame_visualizer import PygameVisualizer
+
+            visualizer = PygameVisualizer(graph, controller.history)
+            visualizer.render()
 
     except FileNotFoundError as e:
         print(
             f"{RED}Error: Map file not found. {e}.{RESET}",
             file=sys.stderr,
         )
+        traceback.print_exc()
         sys.exit(1)
     except ValueError as e:
         print(
             f"{RED}Map Format Error: {e}.{RESET}",
             file=sys.stderr,
         )
+        traceback.print_exc()
         sys.exit(1)
     except Exception as e:
-        print(f"{RED}Unexpected Error: {e}{RESET}")
+        print(f"{RED}Unexpected Error: {e}{RESET}",
+            file=sys.stderr,
+        )
+        traceback.print_exc()
         sys.exit(1)
 
 

@@ -1,5 +1,7 @@
 from .parser_map import MapParser
+from .parser_args import ArgParser
 
 __all__ = [
-    "MapParser"
+    "MapParser",
+    "ArgParser"
 ]

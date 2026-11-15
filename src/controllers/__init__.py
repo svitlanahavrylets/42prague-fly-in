@@ -1,5 +1,6 @@
-from .simulation import SimulationController
+from .simulation import SimulationController, TurnSnapshot
 
 __all__ = [
-    "SimulationController"
+    "SimulationController",
+    "TurnSnapshot"
 ]
