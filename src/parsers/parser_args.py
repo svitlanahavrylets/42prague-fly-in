@@ -3,7 +3,7 @@ import argparse
 from pathlib import Path
 
 class ArgParser:
-    
+
     @staticmethod
     def parse_args() -> argparse.Namespace:
         parser = argparse.ArgumentParser(

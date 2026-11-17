@@ -8,7 +8,6 @@ class TurnSnapshot:
     turn: int
     drone_locations: dict[int, str]
     zone_counts: dict[str, int]
-    conn_counts: dict[str, int]
 
 
 class SimulationController:
@@ -53,19 +52,15 @@ class SimulationController:
         self, turn: int, drone_locations: dict[int, str]
     ) -> None:
         zone_counts: dict[str, int] = {}
-        conn_counts: dict[str, int] = {}
 
         for location in drone_locations.values():
-            if "-" in location:
-                conn_counts[location] = conn_counts.get(location, 0) + 1
-            else:
+            if "-" not in location:
                 zone_counts[location] = zone_counts.get(location, 0) + 1
 
         snapshot = TurnSnapshot(
             turn=turn,
             drone_locations=drone_locations,
             zone_counts=zone_counts,
-            conn_counts=conn_counts,
         )
         self.history.append(snapshot)
 

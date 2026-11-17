@@ -12,9 +12,3 @@ class BaseVisualizer(ABC):
         """Initialize the visualizer with a graph and simulation history."""
         self._graph: Graph = graph
         self._history: list[TurnSnapshot] = history
-    
-
-# @abstractmethod
-#     def render(self) -> None:
-#         """Render the simulation visualization."""
-#         pass

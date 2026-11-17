@@ -1,6 +1,6 @@
 import heapq
 from collections import deque
-from ..models import Graph
+from ..models import Graph, ZoneType
 from .collision_manager import CollisionManager
 
 
@@ -26,14 +26,14 @@ class CooperativeAStar:
         all other zones using simple BFS."""
         distances: dict[str, float] = {target_zone: 0.0}
         queue = deque([target_zone])
-        print(f"queue => {queue}")
+        # print(f"queue => {queue}")
 
         while queue:
             current = queue.popleft()
-            print(f"current => {current}")
+            # print(f"current => {current}")
 
             for neighbor, _, _ in self.graph.get_neighbors(current):
-                print(f"neighbor => {neighbor}")
+                # print(f"neighbor => {neighbor}")
                 if neighbor.name not in distances:
                     distances[neighbor.name] = distances[current] + 1.0
                     queue.append(neighbor.name)
@@ -79,7 +79,16 @@ class CooperativeAStar:
 
             if is_zone_free and is_link_free:
                 move_g = g_cost + float(cost)
-                move_f = move_g + self._heuristic(neighbors_zone.name)
+                priority_bonus = (
+                    0.001
+                    if neighbors_zone.zone_type == ZoneType.PRIORITY
+                    else 0.0
+                )
+                move_f = (
+                    move_g
+                    + self._heuristic(neighbors_zone.name)
+                    - priority_bonus
+                )
                 move_path = path + [(neighbors_zone.name, arrival_turn)]
                 neighbors.append((
                         move_f,
@@ -114,7 +123,7 @@ class CooperativeAStar:
         i = 0
         while open_set:
             i = i + 1
-            print(f"open_set {i} turn =========> {open_set}")
+            # print(f"open_set {i} turn =========> {open_set}")
             f_score, _, g_cost, turn, current_zone, path = heapq.heappop(
                 open_set
             )
