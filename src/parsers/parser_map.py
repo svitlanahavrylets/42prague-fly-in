@@ -25,7 +25,8 @@ class MapParser:
             return data
 
     def parse_data(self, data: str) -> tuple[Graph, int]:
-        nb_drones: int = 0
+        pref_nb_drones: str = "nb_drones:"
+        nb_drones: int | None = None
         zones: dict[str, Zone] = {}
         connections: list[Connection] = []
         start_zone_name: str | None = None
@@ -33,9 +34,12 @@ class MapParser:
 
         for l_index, line in enumerate(data.splitlines(), start=1):
             line = line.strip()
-            if not line or line.startswith("#"):
+            line = line.split("#", 1)[0].strip()
+            if not line:
                 continue
-            if line.startswith("nb_drones:"):
+            if line.startswith(pref_nb_drones):
+                if nb_drones is not None:
+                    raise ValueError(f"Line {l_index}: Duplicate 'nb_drones' definition.")
                 try:
                     nb_drones = int(line.split(":")[1])
                     if nb_drones <= 0:
@@ -47,6 +51,10 @@ class MapParser:
                         f"Line {l_index}: Invalid drone count. {e}"
                     )
                 continue
+            if nb_drones is None:
+                raise ValueError(
+                f"Line {l_index}: 'nb_drones' must be defined first."
+            )
 
             if line.startswith(("start_hub:", "end_hub:", "hub:")):
                 zone, is_start, is_end = self.parse_zone_line(line, l_index)
@@ -93,11 +101,17 @@ class MapParser:
 
                 connections.append(conn)
                 continue
-
+            else:
+                raise ValueError(
+                f"Line {l_index}: Unknown directive or invalid syntax: '{line}'"
+            )
         if start_zone_name is None:
             raise ValueError("Missing start zone")
         if end_zone_name is None:
             raise ValueError("Missing end zone")
+
+        if nb_drones is None:
+            raise ValueError("Missing required 'nb_drones' definition.")
 
         graph = Graph(
             zones=zones,
@@ -133,9 +147,18 @@ class MapParser:
             meta_str = meta_part.rstrip("]").strip()
 
             for item in meta_str.split():
-                if "=" in item:
-                    k, v = item.split("=", 1)
-                    metadata[k] = v
+                if "=" not in item:
+                    raise ValueError(
+                        f"Line {l_index}: Invalid metadata format '{item}', expected 'key=value'"
+                    )
+                k, v = item.split("=", 1)
+                if k not in ("zone", "color", "max_drones"):
+                    raise ValueError(f"Attribute {k} does not exist")
+                if not v:
+                    raise ValueError(
+                        f"Line {l_index}: Empty value for attribute '{k}'"
+                    )
+                metadata[k] = v
             content = main_part.strip()
 
         parts = content.split()
@@ -172,6 +195,8 @@ class MapParser:
             raise ValueError(
                 f"Line {l_index}: 'max_drones' must be an integer"
             )
+        if max_drones <= 0:
+            raise ValueError(f"Line {l_index}: 'max_drones' sould be grather than 0")
         color = metadata.get("color", None)
 
         zone = Zone(
@@ -197,9 +222,14 @@ class MapParser:
             main_part, meta_part = content.split("[", 1)
             meta_str = meta_part.rstrip("]").strip()
             for item in meta_str.split():
-                if "=" in item:
-                    k, v = item.split("=", 1)
-                    metadata[k] = v
+                if "=" not in item:
+                    raise ValueError(
+                        f"Line {l_index}: Invalid metadata format '{item}', expected 'key=value'"
+                    )
+                k, v = item.split("=", 1)
+                if k != "max_link_capacity":
+                    raise ValueError(f"Attribute {k} does not exist")
+                metadata[k] = v
             content = main_part.strip()
 
         parts = content.split("-")
@@ -209,7 +239,10 @@ class MapParser:
             )
 
         z1_name, z2_name = parts[0].strip(), parts[1].strip()
-
+        if z1_name == z2_name:
+            raise ValueError(
+        f"Line {l_index}: Self-loop connection '{z1_name}-{z2_name}' is not allowed."
+    )
         if z1_name not in zones:
             raise ValueError(
                 f"Line {l_index}: Connection refers to undefined zone "
@@ -220,8 +253,14 @@ class MapParser:
                 f"Line {l_index}: Connection refers to undefined zone "
                 f"'{z2_name}'"
             )
-
-        max_capacity = int(metadata.get("max_link_capacity", 1))
+        try:
+            max_capacity = int(metadata.get("max_link_capacity", 1))
+        except ValueError:
+            raise ValueError(
+                f"Line {l_index}: 'max_link_capacity' must be an integer"
+            )
+        if max_capacity <= 0:
+            raise ValueError(f"Line {l_index}: 'max_link_capacity' sould be grather than 0")
 
         connection = Connection(
             zones=(z1_name, z2_name),

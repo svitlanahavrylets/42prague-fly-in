@@ -1,0 +1,7 @@
+nb_drones: 5
+start_hub: hub 0 0 [color=green]
+end_hub: goal 10 10 [color=yellow]
+hub: wall 1 0 [zone=blocked]
+
+connection: hub-wall
+connection: wall-goal
