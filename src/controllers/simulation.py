@@ -5,19 +5,25 @@ from ..models import Drone
 
 @dataclass(frozen=True)
 class TurnSnapshot:
+    """Store drone locations and zone counts for one simulation turn."""
+
     turn: int
     drone_locations: dict[int, str]
     zone_counts: dict[str, int]
 
 
 class SimulationController:
+    """Build turn snapshots and print the drone movements."""
+
     def __init__(self, drones: list[Drone]) -> None:
+        """Create a controller for the planned drone paths."""
         self.drones: list[Drone] = drones
         self.history: list[TurnSnapshot] = []
 
     def _get_drone_action(self, drone: Drone, turn: int) -> (
         tuple[str | None, str]
     ):
+        """Return the movement text and location for one drone and turn."""
         if turn == 0:
             return None, drone.path[0][0]
 
@@ -37,6 +43,7 @@ class SimulationController:
         return None, drone.path[-1][0]
 
     def _get_max_turn(self) -> int:
+        """Return the last turn used by any drone path."""
         max_turn = 0
         for drone in self.drones:
             if not drone.path:
@@ -51,6 +58,7 @@ class SimulationController:
     def _record_snapshot(
         self, turn: int, drone_locations: dict[int, str]
     ) -> None:
+        """Save drone locations and zone occupancy for one turn."""
         zone_counts: dict[str, int] = {}
 
         for location in drone_locations.values():
@@ -66,6 +74,7 @@ class SimulationController:
 
 
     def run(self) -> None:
+        """Print each turn and store its state in the history."""
         self.history.clear()
         max_turn = self._get_max_turn()
 

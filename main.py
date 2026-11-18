@@ -12,6 +12,7 @@ RED = "\033[91m"
 RESET = "\033[0m"
 
 def main() -> None:
+    """Parse the input map, plan drone routes, and run the simulation."""
 
     try:
         args = ArgParser.parse_args()
@@ -25,7 +26,7 @@ def main() -> None:
         algorithms = CooperativeAStar(graph, cm)
 
         for drone in drones:
-            print(f"drone => {drone}")
+            # print(f"drone => {drone}")
 
             start_turn = 0
             path = algorithms.plan_route(
@@ -39,7 +40,7 @@ def main() -> None:
             cm.register_path(path)
             # print(f"✅ {drone.id}: {path}")
 
-        print("----------simulations-----------")
+        # print("----------simulations-----------")
         controller = SimulationController(drones)
         controller.run()
 

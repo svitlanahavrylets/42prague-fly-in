@@ -11,7 +11,7 @@ class ZoneType(str, Enum):
 
 
 class Zone(BaseModel):
-    """Reprezents a graph node (zone/hub) in the network"""
+    """Represent a zone or hub in the routing graph."""
     name: str = Field(
         min_length=1,
         description="Name of the zone"

@@ -5,12 +5,15 @@ from .collision_manager import CollisionManager
 
 
 class CooperativeAStar:
+    """Plan collision-free routes for drones with A* search."""
+
     def __init__(
         self,
         graph: Graph,
         collision_manager: CollisionManager,
         max_turns: int = 1000
     ) -> None:
+        """Set up route search with a graph and collision manager."""
         self.graph = graph
         self.cm = collision_manager
         self.max_turns = max_turns
@@ -52,6 +55,7 @@ class CooperativeAStar:
         target_zone: str,
         path: list[tuple[str, int]]
     ) -> list[tuple[float, float, int, str, list[tuple[str, int]]]]:
+        """Create valid wait and move options from the current state."""
         neighbors = []
         next_turn = turn + 1
         is_free = self.cm.is_zone_free(current_zone, next_turn)

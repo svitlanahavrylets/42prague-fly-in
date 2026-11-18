@@ -4,6 +4,7 @@ from ..src.models import Zone, ZoneType, Connection, Drone, Graph
 
 
 def test_zone_defaults():
+    """Check the default values for a zone."""
     zone = Zone(name="hub1", x=10, y=20)
     assert zone.name == "hub1"
     assert zone.zone_type == ZoneType.NORMAL
@@ -12,35 +13,41 @@ def test_zone_defaults():
 
 
 def test_invalid_max_drones():
+    """Check that a zone rejects a negative capacity."""
     with pytest.raises(ValidationError):
         print("invalid_max_drones")
         Zone(name="bad_hub", x=0, y=0, max_drones=-1)
 
 
 def test_invalid_zone_type():
+    """Check that a zone rejects an unknown type."""
     with pytest.raises(ValidationError):
         print("invalid_zone_type")
         Zone(name="bad_hub", x=0, y=0, zone_type="unknown")
 
 
 def test_connection():
+    """Check that a connection stores its capacity."""
     con = Connection(zones=["hub1", "hub2"], max_link_capacity=2)
     assert con.max_link_capacity == 2
 
 
 def test_invalid_zones_connection():
+    """Check that a connection requires two zone names."""
     with pytest.raises(ValidationError):
         print("invalid_zone_connection")
         Connection(zones=["hub1"], max_link_capacity=2)
 
 
 def test_invalid_capacity_connection():
+    """Check that a connection rejects a negative capacity."""
     with pytest.raises(ValidationError):
         print("invalid_capacity_connection")
         Connection(zones=["hub1", "hub2"], max_link_capacity=-1)
 
 
 def test_drone_defaults():
+    """Check the default values for a drone."""
     drone = Drone(id=1, current_zone="start")
     assert drone.id == 1
     assert drone.current_zone == "start"
@@ -50,6 +57,7 @@ def test_drone_defaults():
 
 
 def test_drone_in_transit():
+    """Check that a drone can store an in-flight destination."""
     drone = Drone(
         id=2,
         current_zone="start",
@@ -61,16 +69,19 @@ def test_drone_in_transit():
 
 
 def test_invalid_drone_id():
+    """Check that a drone ID must be positive."""
     with pytest.raises(ValidationError):
         Drone(id=0, current_zone="start")
 
 
 def test_invalid_drone_remaining_turns():
+    """Check that remaining flight time cannot be negative."""
     with pytest.raises(ValidationError):
         Drone(id=1, current_zone="start", remaining_turns=-1)
 
 
 def test_graph_creation_and_neighbors():
+    """Check graph endpoints and neighbor lookup."""
     z_start = Zone(name="start", x=0, y=0, is_start=True)
     hub1 = Zone(name="hub1", x=1, y=0)
     z_end = Zone(name="end", x=2, y=0, is_end=True)

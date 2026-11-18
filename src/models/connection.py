@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field
 
 
 class Connection(BaseModel):
-    """Define a bidirectional connection (edge) between two zones"""
+    """Represent a bidirectional link between two zones."""
     zones: tuple[str, str] = Field(
         description="Pair of connected zone names (zone_a, zone_b)"
     )

@@ -7,6 +7,7 @@ class CollisionManager:
     and connections across turns."""
 
     def __init__(self, graph: Graph) -> None:
+        """Create an empty reservation manager for the given graph."""
         self.graph = graph
         self._zone_occupancy: dict[tuple[str, int], int] = {}
         self._link_occupancy: dict[tuple[str, int], int] = {}
@@ -30,12 +31,14 @@ class CollisionManager:
         return current_count < zone.max_drones
 
     def is_link_free(self, connection: Connection, turn: int) -> bool:
+        """Return whether the connection has room at the given turn."""
         conn_id = self._get_connection_id(connection)
 
         current_count = self._link_occupancy.get((conn_id, turn), 0)
         return current_count < connection.max_link_capacity
 
     def reserve_zone(self, zone_name: str, turn: int) -> None:
+        """Reserve one place in a zone for the given turn."""
         if self.is_zone_free(zone_name, turn):
             key = (zone_name, turn)
             self._zone_occupancy[key] = self._zone_occupancy.get(key, 0) + 1

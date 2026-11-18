@@ -3,9 +3,11 @@ import argparse
 from pathlib import Path
 
 class ArgParser:
+    """Read the command-line options for the simulation."""
 
     @staticmethod
     def parse_args() -> argparse.Namespace:
+        """Return the parsed map path and visualization choice."""
         parser = argparse.ArgumentParser(
         description="Fly-in: Drone routing simulation"
         )

@@ -9,15 +9,20 @@ RESET = "\033[0m"
 
 
 class MapParser:
+    """Read and validate a map file for the simulation."""
+
     def __init__(self, map_path: Path) -> None:
+        """Store the path of the map file to parse."""
         self.map_path = map_path
 
     def parse_map(self) -> tuple[Graph, int]:
+        """Read the map file and return its graph and drone count."""
         data = self.read_map_file()
         parsed_data = self.parse_data(data)
         return parsed_data
 
     def read_map_file(self) -> str:
+        """Return the map file contents as text."""
         if not self.map_path.exists():
             raise FileNotFoundError(f"Map file is not found: '{self.map_path}")
         with open(self.map_path, "r", encoding="utf-8") as f:
@@ -25,6 +30,7 @@ class MapParser:
             return data
 
     def parse_data(self, data: str) -> tuple[Graph, int]:
+        """Parse map text and return its graph and drone count."""
         pref_nb_drones: str = "nb_drones:"
         nb_drones: int | None = None
         zones: dict[str, Zone] = {}
@@ -126,6 +132,7 @@ class MapParser:
         line: str,
         l_index: int,
     ) -> tuple[Zone, bool, bool]:
+        """Parse one hub line and report whether it is a start or end."""
         is_start = line.startswith("start_hub:")
         is_end = line.startswith("end_hub:")
 
@@ -215,6 +222,7 @@ class MapParser:
     def parse_connection_line(
         self, line: str, l_index: int, zones: dict[str, Zone]
     ) -> Connection:
+        """Parse one connection line using the zones already read."""
         content = line.split(":", 1)[1].strip()
 
         metadata: dict[str, str] = {}
