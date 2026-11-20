@@ -34,7 +34,6 @@ def main() -> None:
             )
             if path is None:
                 raise ValueError(f"Path for Drone {drone.id!r} does not exist")
-                break
 
             drone.path = path
             cm.register_path(path)

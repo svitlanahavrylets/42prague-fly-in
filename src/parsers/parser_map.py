@@ -4,9 +4,6 @@ from ..models import Graph
 from ..models import Connection
 from ..models import ZoneType, Zone
 
-RED = "\033[91m"
-RESET = "\033[0m"
-
 
 class MapParser:
     """Read and validate a map file for the simulation."""
