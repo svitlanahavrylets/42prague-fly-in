@@ -72,7 +72,6 @@ class SimulationController:
         )
         self.history.append(snapshot)
 
-
     def run(self) -> None:
         """Print each turn and store its state in the history."""
         self.history.clear()
@@ -98,5 +97,3 @@ class SimulationController:
 
             self._record_snapshot(turn, current_locations)
             # print(f"history {self.history}")
-            
-

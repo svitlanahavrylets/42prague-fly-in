@@ -8,9 +8,7 @@ class CooperativeAStar:
     """Plan collision-free routes for drones with A* search."""
 
     def __init__(
-        self,
-        graph: Graph,
-        collision_manager: CollisionManager,
+        self, graph: Graph, collision_manager: CollisionManager,
         max_turns: int = 1000
     ) -> None:
         """Set up route search with a graph and collision manager."""
@@ -22,8 +20,7 @@ class CooperativeAStar:
         )
 
     def _calculate_static_distances(
-        self,
-        target_zone: str
+        self, target_zone: str
     ) -> dict[str, float]:
         """Calculates minimum hops from target_zone to
         all other zones using simple BFS."""
@@ -48,12 +45,8 @@ class CooperativeAStar:
         return self.distances.get(zone_a, 0.0)
 
     def _generate_valid_neighbors(
-        self,
-        current_zone: str,
-        turn: int,
-        g_cost: float,
-        target_zone: str,
-        path: list[tuple[str, int]]
+        self, current_zone: str, turn: int,
+        g_cost: float, path: list[tuple[str, int]]
     ) -> list[tuple[float, float, int, str, list[tuple[str, int]]]]:
         """Create valid wait and move options from the current state."""
         neighbors = []
@@ -67,9 +60,7 @@ class CooperativeAStar:
             neighbors.append((new_f, new_g, next_turn, current_zone, new_path))
 
         for (
-            neighbors_zone,
-            conn,
-            cost
+            neighbors_zone, conn, cost
         ) in self.graph.get_neighbors(current_zone):
             arrival_turn = turn + cost
 
@@ -83,32 +74,22 @@ class CooperativeAStar:
 
             if is_zone_free and is_link_free:
                 move_g = g_cost + float(cost)
-                priority_bonus = (
-                    0.001
-                    if neighbors_zone.zone_type == ZoneType.PRIORITY
-                    else 0.0
-                )
-                move_f = (
-                    move_g
-                    + self._heuristic(neighbors_zone.name)
-                    - priority_bonus
-                )
+                priority_bonus = 0.0
+                if neighbors_zone.zone_type == ZoneType.PRIORITY:
+                    priority_bonus = 0.001
+                else:
+                    priority_bonus = 0.0
+                move_f = (move_g + self._heuristic(neighbors_zone.name)
+                          - priority_bonus)
                 move_path = path + [(neighbors_zone.name, arrival_turn)]
-                neighbors.append((
-                        move_f,
-                        move_g,
-                        arrival_turn,
-                        neighbors_zone.name,
-                        move_path
-                ))
+                neighbors.append((move_f, move_g, arrival_turn,
+                                  neighbors_zone.name, move_path))
 
         return neighbors
 
     def plan_route(
-        self,
-        start_zone_name: str,
-        end_zone_name: str,
-        start_turn: int = 0,
+        self, start_zone_name: str,
+        end_zone_name: str, start_turn: int = 0
     ) -> list[tuple[str, int]] | None:
         """Finds a collision-free path for a single
         drone starting at start_turn."""
@@ -129,8 +110,7 @@ class CooperativeAStar:
             i = i + 1
             print(f"open_set {i} turn =========> {open_set}")
             f_score, _, g_cost, turn, current_zone, path = heapq.heappop(
-                open_set
-            )
+                open_set)
 
             state_key = (current_zone, turn)
             if state_key in visited:

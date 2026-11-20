@@ -42,7 +42,9 @@ class MapParser:
                 continue
             if line.startswith(pref_nb_drones):
                 if nb_drones is not None:
-                    raise ValueError(f"Line {l_index}: Duplicate 'nb_drones' definition.")
+                    raise ValueError(
+                        f"Line {l_index}: Duplicate 'nb_drones' definition."
+                    )
                 try:
                     nb_drones = int(line.split(":")[1])
                     if nb_drones <= 0:
@@ -56,8 +58,8 @@ class MapParser:
                 continue
             if nb_drones is None:
                 raise ValueError(
-                f"Line {l_index}: 'nb_drones' must be defined first."
-            )
+                    f"Line {l_index}: 'nb_drones' must be defined first."
+                )
 
             if line.startswith(("start_hub:", "end_hub:", "hub:")):
                 zone, is_start, is_end = self.parse_zone_line(line, l_index)
@@ -106,8 +108,9 @@ class MapParser:
                 continue
             else:
                 raise ValueError(
-                f"Line {l_index}: Unknown directive or invalid syntax: '{line}'"
-            )
+                    f"Line {l_index}: Unknown directive or invalid "
+                    f"syntax: '{line}'"
+                )
         if start_zone_name is None:
             raise ValueError("Missing start zone")
         if end_zone_name is None:
@@ -153,7 +156,8 @@ class MapParser:
             for item in meta_str.split():
                 if "=" not in item:
                     raise ValueError(
-                        f"Line {l_index}: Invalid metadata format '{item}', expected 'key=value'"
+                        f"Line {l_index}: Invalid metadata format "
+                        f"'{item}', expected 'key=value'"
                     )
                 k, v = item.split("=", 1)
                 if k not in ("zone", "color", "max_drones"):
@@ -200,7 +204,9 @@ class MapParser:
                 f"Line {l_index}: 'max_drones' must be an integer"
             )
         if max_drones <= 0:
-            raise ValueError(f"Line {l_index}: 'max_drones' sould be grather than 0")
+            raise ValueError(
+                f"Line {l_index}: 'max_drones' sould be grather than 0"
+            )
         color = metadata.get("color", None)
 
         zone = Zone(
@@ -229,7 +235,8 @@ class MapParser:
             for item in meta_str.split():
                 if "=" not in item:
                     raise ValueError(
-                        f"Line {l_index}: Invalid metadata format '{item}', expected 'key=value'"
+                        f"Line {l_index}: Invalid metadata format "
+                        f"'{item}', expected 'key=value'"
                     )
                 k, v = item.split("=", 1)
                 if k != "max_link_capacity":
@@ -246,8 +253,9 @@ class MapParser:
         z1_name, z2_name = parts[0].strip(), parts[1].strip()
         if z1_name == z2_name:
             raise ValueError(
-        f"Line {l_index}: Self-loop connection '{z1_name}-{z2_name}' is not allowed."
-    )
+                f"Line {l_index}: Self-loop connection "
+                f"'{z1_name}-{z2_name}' is not allowed."
+            )
         if z1_name not in zones:
             raise ValueError(
                 f"Line {l_index}: Connection refers to undefined zone "
@@ -265,7 +273,10 @@ class MapParser:
                 f"Line {l_index}: 'max_link_capacity' must be an integer"
             )
         if max_capacity <= 0:
-            raise ValueError(f"Line {l_index}: 'max_link_capacity' sould be grather than 0")
+            raise ValueError(
+                f"Line {l_index}: 'max_link_capacity' "
+                f"sould be grather than 0"
+            )
 
         connection = Connection(
             zones=(z1_name, z2_name),

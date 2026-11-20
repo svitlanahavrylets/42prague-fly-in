@@ -2,14 +2,14 @@ import math
 import os
 import sys
 
-os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
-
 import pygame  # noqa: E402
 
 from ..controllers import TurnSnapshot
 from ..models import Graph, Zone
 from .base import BaseVisualizer
 from .colors import ColorResolver, ThemePalette
+
+os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
 
 
 class PygameVisualizer(BaseVisualizer):
@@ -55,7 +55,9 @@ class PygameVisualizer(BaseVisualizer):
         span_y = max_y - min_y
 
         avail_w = max(100, self._width - 2 * self.PADDING_X)
-        avail_h = max(100, self._height - self.PADDING_TOP - self.PADDING_BOTTOM)
+        avail_h = max(
+            100, self._height - self.PADDING_TOP - self.PADDING_BOTTOM
+        )
 
         scale_x = avail_w / span_x if span_x > 0 else float("inf")
         scale_y = avail_h / span_y if span_y > 0 else float("inf")
@@ -244,7 +246,6 @@ class PygameVisualizer(BaseVisualizer):
                 )
                 screen.blit(text_surf, badge_rect)
 
-
     def _draw_zones(
         self, screen: pygame.Surface, snap: TurnSnapshot
     ) -> None:
@@ -298,7 +299,9 @@ class PygameVisualizer(BaseVisualizer):
                     cap_surf = self._font_drone.render(
                         cap_str, True, cap_color
                     )
-                    cap_y = cy - radius - (18 if type_color is not None else 13)
+                    cap_y = cy - radius - (
+                        18 if type_color is not None else 13
+                    )
                     cap_rect = cap_surf.get_rect(center=(cx, cap_y))
                     screen.blit(cap_surf, cap_rect)
 

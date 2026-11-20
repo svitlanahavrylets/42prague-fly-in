@@ -11,6 +11,7 @@ from src.controllers import SimulationController
 RED = "\033[91m"
 RESET = "\033[0m"
 
+
 def main() -> None:
     """Parse the input map, plan drone routes, and run the simulation."""
 
@@ -49,23 +50,18 @@ def main() -> None:
             visualizer.render()
 
     except FileNotFoundError as e:
-        print(
-            f"{RED}Error: Map file not found. {e}.{RESET}",
-            file=sys.stderr,
-        )
+        print(f"{RED}Error: Map file not found. {e}.{RESET}",
+              file=sys.stderr)
         # traceback.print_exc()
         sys.exit(1)
     except ValueError as e:
-        print(
-            f"{RED}Map Format Error: {e}.{RESET}",
-            file=sys.stderr,
-        )
+        print(f"{RED}Map Format Error: {e}.{RESET}",
+              file=sys.stderr)
         # traceback.print_exc()
         sys.exit(1)
     except Exception as e:
         print(f"{RED}Unexpected Error: {e}{RESET}",
-            file=sys.stderr,
-        )
+              file=sys.stderr)
         # traceback.print_exc()
         sys.exit(1)
 
