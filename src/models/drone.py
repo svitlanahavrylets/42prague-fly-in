@@ -38,13 +38,3 @@ class Drone(BaseModel):
             cls(id=i + 1, current_zone=start_location)
             for i in range(count)
         ]
-
-    def get_position_at_turn(self, turn: int) -> str | None:
-        """
-        Return the zone scheduled for this drone at the given turn.
-        Returns None if no move is registered for this turn.
-        """
-        for zone_name, t in self.path:
-            if t == turn:
-                return zone_name
-        return None

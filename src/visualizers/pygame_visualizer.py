@@ -487,7 +487,7 @@ class PygameVisualizer(BaseVisualizer):
                 self._coords = self._compute_screen_coords()
 
             screen = pygame.display.set_mode(
-                (self._width, self._height), pygame.RESIZABLE
+                (self._width, self._height)
             )
             pygame.display.set_caption("Fly-in: Drone Routing Visualizer")
             clock = pygame.time.Clock()

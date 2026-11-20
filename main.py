@@ -28,9 +28,8 @@ def main() -> None:
         for drone in drones:
             # print(f"drone => {drone}")
 
-            start_turn = 0
             path = algorithms.plan_route(
-                start_turn, graph.start_zone_name, graph.end_zone_name
+                graph.start_zone_name, graph.end_zone_name
             )
             if path is None:
                 raise ValueError(f"Path for Drone {drone.id!r} does not exist")

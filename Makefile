@@ -58,8 +58,7 @@ clean:
 fclean: clean
 		@printf "$(BOLD)$(RED)[FCLEAN] Removing the virtual environment and lock file...$(RESET)\n"
 		rm -rf .venv
-		rm -rf uv.lock
 		@printf "$(BOLD)$(GREEN)[FCLEAN] Complete.$(RESET)\n"
 
 
-.PHONY: all install run debug lint lint-strict clean fclean bonus
+.PHONY: all install run debug lint lint-strict clean fclean
