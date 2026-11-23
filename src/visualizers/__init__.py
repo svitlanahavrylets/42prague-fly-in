@@ -1,3 +1,5 @@
+"""Graphical and base visualization components."""
+
 from .pygame_visualizer import PygameVisualizer
 from .base import BaseVisualizer
 from .colors import ColorResolver, ThemePalette

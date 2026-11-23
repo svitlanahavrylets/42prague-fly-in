@@ -1,4 +1,7 @@
+"""Render the drone-routing simulation with Pygame."""
+
 import math
+from pathlib import Path
 
 import pygame
 
@@ -37,6 +40,7 @@ class PygameVisualizer(BaseVisualizer):
         self._progress: float = 0.0
         self._paused: bool = False
         self._speed: float = 1.0
+        self._drone_sprite: pygame.Surface | None = None
 
     def _compute_screen_coords(self) -> dict[str, tuple[float, float]]:
         """Map graph (x, y) coordinates proportionally onto screen pixels."""
@@ -347,9 +351,17 @@ class PygameVisualizer(BaseVisualizer):
             dx = int(ax + (bx - ax) * smooth_t)
             dy = int(ay + (by - ay) * smooth_t)
 
-            pygame.draw.circle(
-                screen, self._palette.drone_fill, (dx, dy), 11
-            )
+            if self._drone_sprite is not None:
+                sprite_rect = self._drone_sprite.get_rect(center=(dx, dy))
+                screen.blit(self._drone_sprite, sprite_rect)
+                pygame.draw.circle(
+                    screen, self._palette.drone_badge_background, (dx, dy), 11
+                )
+            else:
+                pygame.draw.circle(
+                    screen, self._palette.drone_fill, (dx, dy), 11
+                )
+
             pygame.draw.circle(
                 screen, self._palette.drone_outline, (dx, dy), 11, 2
             )
@@ -523,6 +535,19 @@ class PygameVisualizer(BaseVisualizer):
             screen = pygame.display.set_mode(
                 (self._width, self._height), pygame.RESIZABLE
             )
+            sprite_path = (
+                Path(__file__).resolve().parents[2]
+                / "assets"
+                / "drone_img.png"
+            )
+            try:
+                raw_sprite = pygame.image.load(str(sprite_path))
+                self._drone_sprite = pygame.transform.smoothscale(
+                    raw_sprite.convert_alpha(), (44, 44)
+                )
+            except (OSError, pygame.error):
+                self._drone_sprite = None
+
             pygame.display.set_caption("Fly-in: Drone Routing Visualizer")
             clock = pygame.time.Clock()
             self._font_small = pygame.font.SysFont("consolas", 14)

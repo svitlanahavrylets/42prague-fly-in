@@ -1,3 +1,5 @@
+"""Represent a drone and create fleets for a simulation."""
+
 from pydantic import BaseModel, Field
 
 

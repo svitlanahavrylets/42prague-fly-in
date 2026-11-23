@@ -1,3 +1,5 @@
+"""Run the simulation and record drone locations for visualization."""
+
 from dataclasses import dataclass
 
 from ..models import Drone

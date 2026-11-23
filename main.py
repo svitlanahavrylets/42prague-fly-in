@@ -1,3 +1,5 @@
+"""Run the Fly-in drone-routing simulation from the command line."""
+
 import sys
 import os
 # import traceback

@@ -1,3 +1,5 @@
+"""Fly-in drone-routing simulation package."""
+
 from .parsers import MapParser
 from .parsers import ArgParser
 from .models import Drone

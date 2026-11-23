@@ -1,3 +1,5 @@
+"""Define the shared interface and errors for simulation visualizers."""
+
 from abc import ABC
 
 from ..models import Graph

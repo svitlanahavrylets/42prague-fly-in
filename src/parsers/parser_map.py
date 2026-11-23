@@ -1,3 +1,5 @@
+"""Parse and validate map files for the simulation."""
+
 from pathlib import Path
 
 from ..models import Graph

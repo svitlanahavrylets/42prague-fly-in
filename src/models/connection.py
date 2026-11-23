@@ -1,3 +1,5 @@
+"""Represent bidirectional links between simulation zones."""
+
 from pydantic import BaseModel, Field
 
 

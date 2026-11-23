@@ -1,3 +1,5 @@
+"""Define the visualization palette and zone color resolver."""
+
 from dataclasses import dataclass
 
 import pygame
@@ -31,6 +33,7 @@ class ThemePalette:
 
     drone_fill: tuple[int, int, int] = (248, 250, 252)
     drone_outline: tuple[int, int, int] = (15, 23, 42)
+    drone_badge_background: tuple[int, int, int] = (255, 255, 255)
 
 
 class ColorResolver:

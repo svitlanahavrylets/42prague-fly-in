@@ -1,3 +1,5 @@
+"""Represent the zone graph and provide connection lookups."""
+
 from pydantic import BaseModel, Field
 from .zone import ZoneType, Zone
 from .connection import Connection

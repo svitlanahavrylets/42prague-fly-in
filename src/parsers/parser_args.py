@@ -1,3 +1,5 @@
+"""Parse command-line arguments for the simulation."""
+
 import argparse
 
 from pathlib import Path

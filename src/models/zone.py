@@ -1,3 +1,5 @@
+"""Represent zones and their movement rules in the simulation graph."""
+
 from pydantic import BaseModel, Field
 from enum import Enum
 

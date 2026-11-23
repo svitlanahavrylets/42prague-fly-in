@@ -1,3 +1,5 @@
+"""Test validation and behavior of simulation domain models."""
+
 import pytest
 from pydantic import ValidationError
 from src.models import Zone, ZoneType, Connection, Drone, Graph

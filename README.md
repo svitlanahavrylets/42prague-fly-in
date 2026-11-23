@@ -23,6 +23,8 @@ fly-in/
 ├── uv.lock                         Locked dependency versions
 ├── Makefile                        Install, run, debug, clean, and lint
 ├── README.md                       Project guide
+├── assets/
+│   └── drone_img.png               Image for drone reprezentation in vizualization
 ├── maps/
 │   ├── easy/                       Basic maps
 │   ├── medium/                     Maps with more route choices
@@ -322,4 +324,4 @@ AI assistants (such as Codex / Gemini) were used during the development of this 
 * **Algorithm Comprehension & Design:** AI helped clarify Cooperative Space-Time A* pathfinding, including `(zone, turn)` states and a reverse BFS distance heuristic. 
 * **Debugging & Edge Cases:** Assisting in identifying and resolving edge cases across the codebase, such as infinite wait loops on disconnected graphs.
 * **Visuals & Rendering:** AI helped structure the `Pygame` visualization layer, including dynamic window resizing (`VIDEORESIZE`), smooth movement interpolation between turns.
-- **Documentation**: Structuring and drafting the initial layout of this `README.md` file.
+- **Documentation**: Structuring and drafting the initial layout of this `README.md` file and writing docstrings.

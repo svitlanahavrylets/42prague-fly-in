@@ -1,3 +1,5 @@
+"""Track zone and connection reservations across simulation turns."""
+
 from ..models import Graph
 from ..models import Connection
 

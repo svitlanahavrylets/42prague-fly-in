@@ -1,3 +1,5 @@
+"""Implementation Cooperative A* pathfinding algorithm."""
+
 import heapq
 from collections import deque
 from ..models import Graph, ZoneType
