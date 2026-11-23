@@ -29,6 +29,9 @@ class ThemePalette:
     connection_idle: tuple[int, int, int] = (71, 85, 105)
     connection_active: tuple[int, int, int] = (56, 189, 248)
 
+    drone_fill: tuple[int, int, int] = (248, 250, 252)
+    drone_outline: tuple[int, int, int] = (15, 23, 42)
+
 
 class ColorResolver:
     """Safely converts zone metadata color strings into muted RGB tuples."""

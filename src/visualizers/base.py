@@ -4,6 +4,10 @@ from ..models import Graph
 from ..controllers import TurnSnapshot
 
 
+class VisualizationError(RuntimeError):
+    """Raised when a visualizer cannot render the simulation."""
+
+
 class BaseVisualizer(ABC):
     """Abstract base class defining the interface
     for simulation visualizers."""

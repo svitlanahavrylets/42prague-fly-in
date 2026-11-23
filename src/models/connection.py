@@ -12,11 +12,3 @@ class Connection(BaseModel):
         description="Maximum drones that can occupy this "
                     "connection simultaneously"
     )
-    current_drones_count: int = Field(
-        default=0,
-        ge=0,
-        description=(
-            "Current number of drones traversing this connection "
-            "in the current turn"
-        ),
-    )

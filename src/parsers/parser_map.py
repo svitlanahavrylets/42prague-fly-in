@@ -241,6 +241,10 @@ class MapParser:
                 k, v = item.split("=", 1)
                 if k != "max_link_capacity":
                     raise ValueError(f"Attribute {k} does not exist")
+                if not v:
+                    raise ValueError(
+                        f"Line {l_index}: Empty value for attribute '{k}'"
+                    )
                 metadata[k] = v
             content = main_part.strip()
 

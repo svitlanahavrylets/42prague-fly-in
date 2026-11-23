@@ -96,4 +96,3 @@ class SimulationController:
                 print(" ".join(turn_moves))
 
             self._record_snapshot(turn, current_locations)
-            # print(f"history {self.history}")

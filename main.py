@@ -1,12 +1,12 @@
 import sys
+import os
 # import traceback
 
-from src.parsers import MapParser
-from src.parsers import ArgParser
+from src.parsers import MapParser, ArgParser
 from src.models import Drone
-from src.algorithms import CollisionManager
-from src.algorithms import CooperativeAStar
+from src.algorithms import CollisionManager, CooperativeAStar
 from src.controllers import SimulationController
+from src.visualizers.base import VisualizationError
 
 RED = "\033[91m"
 RESET = "\033[0m"
@@ -44,9 +44,12 @@ def main() -> None:
         controller.run()
 
         if args.visual == "pygame":
+            os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
             from src.visualizers.pygame_visualizer import PygameVisualizer
 
-            visualizer = PygameVisualizer(graph, controller.history)
+            visualizer = PygameVisualizer(
+                graph, controller.history, nb_drones
+            )
             visualizer.render()
 
     except FileNotFoundError as e:
@@ -58,6 +61,9 @@ def main() -> None:
         print(f"{RED}Map Format Error: {e}.{RESET}",
               file=sys.stderr)
         # traceback.print_exc()
+        sys.exit(1)
+    except VisualizationError as e:
+        print(f"{RED}Visualization Error: {e}{RESET}", file=sys.stderr)
         sys.exit(1)
     except Exception as e:
         print(f"{RED}Unexpected Error: {e}{RESET}",

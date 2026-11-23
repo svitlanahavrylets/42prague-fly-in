@@ -18,6 +18,11 @@ class CooperativeAStar:
         self.distances = self._calculate_static_distances(
             graph.end_zone_name
         )
+        if graph.start_zone_name not in self.distances:
+            raise ValueError(
+                f"No valid path from '{graph.start_zone_name}' "
+                f"to '{graph.end_zone_name}'."
+            )
 
     def _calculate_static_distances(
         self, target_zone: str
@@ -26,14 +31,14 @@ class CooperativeAStar:
         all other zones using simple BFS."""
         distances: dict[str, float] = {target_zone: 0.0}
         queue = deque([target_zone])
-        print(f"queue => {queue}")
+        # print(f"queue => {queue}")
 
         while queue:
             current = queue.popleft()
-            print(f"current => {current}")
+            # print(f"current => {current}")
 
             for neighbor, _, _ in self.graph.get_neighbors(current):
-                print(f"neighbor => {neighbor}")
+                # print(f"neighbor => {neighbor}")
                 if neighbor.name not in distances:
                     distances[neighbor.name] = distances[current] + 1.0
                     queue.append(neighbor.name)
@@ -42,7 +47,7 @@ class CooperativeAStar:
 
     def _heuristic(self, zone_a: str) -> float:
         """Returns the precalculated minimum hops to the target zone."""
-        return self.distances.get(zone_a, 0.0)
+        return self.distances.get(zone_a, float("inf"))
 
     def _generate_valid_neighbors(
         self, current_zone: str, turn: int,
@@ -93,7 +98,7 @@ class CooperativeAStar:
     ) -> list[tuple[str, int]] | None:
         """Finds a collision-free path for a single
         drone starting at start_turn."""
-        f_score = 0
+        f_score = self._heuristic(start_zone_name)
         start_path = [(start_zone_name, start_turn)]
 
         count = 0
@@ -108,7 +113,7 @@ class CooperativeAStar:
         i = 0
         while open_set:
             i = i + 1
-            print(f"open_set {i} turn =========> {open_set}")
+            # print(f"open_set {i} turn =========> {open_set}")
             f_score, _, g_cost, turn, current_zone, path = heapq.heappop(
                 open_set)
 
@@ -124,7 +129,7 @@ class CooperativeAStar:
                 return path
 
             next_options = self._generate_valid_neighbors(
-                current_zone, turn, g_cost, end_zone_name, path
+                current_zone, turn, g_cost, path
             )
 
             for next_f, next_g, next_turn, zone, new_path in next_options:

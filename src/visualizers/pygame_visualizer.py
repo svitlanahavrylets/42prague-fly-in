@@ -1,15 +1,11 @@
 import math
-import os
-import sys
 
-import pygame  # noqa: E402
+import pygame
 
 from ..controllers import TurnSnapshot
 from ..models import Graph, Zone
-from .base import BaseVisualizer
+from .base import BaseVisualizer, VisualizationError
 from .colors import ColorResolver, ThemePalette
-
-os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
 
 
 class PygameVisualizer(BaseVisualizer):
@@ -17,14 +13,17 @@ class PygameVisualizer(BaseVisualizer):
 
     DEFAULT_WIDTH: int = 1440
     DEFAULT_HEIGHT: int = 800
-    PADDING_X: int = 95
-    PADDING_TOP: int = 115
-    PADDING_BOTTOM: int = 95
+    PADDING_X: int = 120
+    PADDING_TOP: int = 120
+    PADDING_BOTTOM: int = 120
     FPS: int = 60
 
-    def __init__(self, graph: Graph, history: list[TurnSnapshot]) -> None:
+    def __init__(
+        self, graph: Graph, history: list[TurnSnapshot], nb_drones: int
+    ) -> None:
         """Initialize window parameters, animation state, and coordinates."""
         super().__init__(graph, history)
+        self._nb_drones: int = nb_drones
         self._palette: ThemePalette = ThemePalette()
         self._width: int = self.DEFAULT_WIDTH
         self._height: int = self.DEFAULT_HEIGHT
@@ -33,7 +32,6 @@ class PygameVisualizer(BaseVisualizer):
         )
         self._font_small: pygame.font.Font | None = None
         self._font_drone: pygame.font.Font | None = None
-        self._font_title: pygame.font.Font | None = None
 
         self._turn_idx: int = 0
         self._progress: float = 0.0
@@ -118,14 +116,9 @@ class PygameVisualizer(BaseVisualizer):
         return None
 
     def _draw_zone_node(
-        self,
-        screen: pygame.Surface,
-        cx: int,
-        cy: int,
-        radius: int,
+        self, screen: pygame.Surface, cx: int, cy: int, radius: int,
         fill_color: tuple[int, int, int],
-        type_color: tuple[int, int, int] | None,
-        is_blocked: bool,
+        type_color: tuple[int, int, int] | None, is_blocked: bool,
     ) -> None:
         """Draw a zone node: clean circle for normal, ringed for special."""
         fill_radius = max(1, int(radius * 0.75))
@@ -172,10 +165,8 @@ class PygameVisualizer(BaseVisualizer):
             )
 
     def _draw_connections(
-        self,
-        screen: pygame.Surface,
-        current_snap: TurnSnapshot,
-        next_snap: TurnSnapshot,
+        self, screen: pygame.Surface,
+        current_snap: TurnSnapshot, next_snap: TurnSnapshot,
     ) -> None:
         """Draw connections and show progress on restricted transits."""
         transit_phases: dict[tuple[str, str], set[int]] = {}
@@ -208,7 +199,11 @@ class PygameVisualizer(BaseVisualizer):
                 for zone_name in (zone_a, zone_b)
             )
             if is_restricted_transit:
-                key = tuple(sorted((zone_a, zone_b)))
+                key = (
+                    (zone_a, zone_b)
+                    if zone_a < zone_b
+                    else (zone_b, zone_a)
+                )
                 transit_phases.setdefault(key, set()).add(phase)
 
         for conn in self._graph.connections:
@@ -221,14 +216,13 @@ class PygameVisualizer(BaseVisualizer):
             width = 5 if conn.max_link_capacity > 1 else 3
 
             pygame.draw.line(
-                screen,
-                self._palette.connection_idle,
+                screen, self._palette.connection_idle,
                 (int(pos_a[0]), int(pos_a[1])),
-                (int(pos_b[0]), int(pos_b[1])),
-                width,
+                (int(pos_b[0]), int(pos_b[1])), width,
             )
 
-            phases = transit_phases.get(tuple(sorted((z1, z2))), set())
+            connection_key = (z1, z2) if z1 < z2 else (z2, z1)
+            phases = transit_phases.get(connection_key, set())
             if phases and self._font_drone is not None:
                 mid_x = int((pos_a[0] + pos_b[0]) / 2.0)
                 mid_y = int((pos_a[1] + pos_b[1]) / 2.0)
@@ -247,9 +241,10 @@ class PygameVisualizer(BaseVisualizer):
                 screen.blit(text_surf, badge_rect)
 
     def _draw_zones(
-        self, screen: pygame.Surface, snap: TurnSnapshot
+        self, screen: pygame.Surface,
+        snap: TurnSnapshot, mouse_pos: tuple[int, int],
     ) -> None:
-        """Draw zone hubs, labels, and occupancy counters."""
+        """Draw zone hubs and show their names when hovered."""
         for zone in self._graph.zones.values():
             pos = self._coords.get(zone.name)
             if pos is None:
@@ -276,18 +271,31 @@ class PygameVisualizer(BaseVisualizer):
                 screen, cx, cy, radius, fill_color, type_color, is_blocked
             )
 
-            if self._font_small is not None:
-                label = self._font_small.render(
-                    zone.name, True, self._palette.text_primary
-                )
-                label_y = cy + radius + (20 if type_color is not None else 14)
-                label_rect = label.get_rect(center=(cx, label_y))
-                screen.blit(label, label_rect)
+            mouse_dx = mouse_pos[0] - cx
+            mouse_dy = mouse_pos[1] - cy
+            is_hovered = mouse_dx * mouse_dx + mouse_dy * mouse_dy <= (
+                radius + 8
+            ) ** 2
 
-                if not is_blocked and self._font_drone is not None:
+            if self._font_small is not None:
+                if is_hovered:
+                    label = self._font_small.render(
+                        zone.name, True, self._palette.text_primary
+                    )
+                    label_y = cy + radius + (
+                        20 if type_color is not None else 14
+                    )
+                    label_rect = label.get_rect(center=(cx, label_y))
+                    screen.blit(label, label_rect)
+
+                if (
+                    is_hovered
+                    and not is_blocked
+                    and self._font_drone is not None
+                ):
                     count = snap.zone_counts.get(zone.name, 0)
                     cap_str = (
-                        f"{count}/∞"
+                        f"{count}/{self._nb_drones}"
                         if is_terminal
                         else f"{count}/{zone.max_drones}"
                     )
@@ -339,18 +347,22 @@ class PygameVisualizer(BaseVisualizer):
             dx = int(ax + (bx - ax) * smooth_t)
             dy = int(ay + (by - ay) * smooth_t)
 
-            pygame.draw.circle(screen, (248, 250, 252), (dx, dy), 11)
-            pygame.draw.circle(screen, (15, 23, 42), (dx, dy), 11, 2)
+            pygame.draw.circle(
+                screen, self._palette.drone_fill, (dx, dy), 11
+            )
+            pygame.draw.circle(
+                screen, self._palette.drone_outline, (dx, dy), 11, 2
+            )
 
             if self._font_drone is not None:
                 id_surf = self._font_drone.render(
-                    f"D{drone_id}", True, (15, 23, 42)
+                    f"D{drone_id}", True, self._palette.drone_outline
                 )
                 id_rect = id_surf.get_rect(center=(dx, dy))
                 screen.blit(id_surf, id_rect)
 
     def _draw_top_legend(self, screen: pygame.Surface) -> None:
-        """Draw a centered single-row legend bar at the top of the window."""
+        """Draw a centered legend bar at the top of the window."""
         legend_items: list[tuple[str, tuple[int, int, int] | None, bool]] = [
             ("Start", self._palette.ring_start, False),
             ("End", self._palette.ring_end, False),
@@ -360,9 +372,13 @@ class PygameVisualizer(BaseVisualizer):
             ("Blocked", self._palette.ring_blocked, True),
         ]
 
-        item_spacing = 148
-        total_w = len(legend_items) * item_spacing + 30
-        panel_h = 48
+        columns = max(2, min(6, (self._width - 40) // 180))
+        panel_w = min(920, max(120, self._width - 40))
+        cell_w = (panel_w - 24) // columns
+        rows = (len(legend_items) + columns - 1) // columns
+        total_w = panel_w
+        row_h = 38
+        panel_h = rows * row_h + 12
         panel_x = (self._width - total_w) // 2
         panel_y = 16
 
@@ -371,30 +387,24 @@ class PygameVisualizer(BaseVisualizer):
             screen, self._palette.panel_bg, panel_rect, border_radius=10
         )
         pygame.draw.rect(
-            screen,
-            self._palette.panel_border,
-            panel_rect,
-            width=1,
-            border_radius=10,
+            screen, self._palette.panel_border,  panel_rect,
+            width=1, border_radius=10,
         )
 
-        center_y = panel_y + panel_h // 2
         for idx, (label_text, ring_color, is_blocked) in enumerate(
             legend_items
         ):
-            icon_x = panel_x + 34 + idx * item_spacing
+            row, column = divmod(idx, columns)
+            center_y = panel_y + 6 + row * row_h + row_h // 2
+            icon_x = panel_x + 24 + column * cell_w
             fill = (
                 self._palette.blocked_hub
                 if is_blocked
                 else self._palette.default_hub
             )
             self._draw_zone_node(
-                screen=screen,
-                cx=icon_x,
-                cy=center_y,
-                radius=5,
-                fill_color=fill,
-                type_color=ring_color,
+                screen=screen, cx=icon_x, cy=center_y, radius=5,
+                fill_color=fill, type_color=ring_color,
                 is_blocked=is_blocked,
             )
 
@@ -411,8 +421,31 @@ class PygameVisualizer(BaseVisualizer):
         self, screen: pygame.Surface, snap: TurnSnapshot
     ) -> None:
         """Draw bottom status and controls bar."""
-        bar_w = min(1220, self._width - 40)
-        bar_h = 48
+        bar_w = max(100, self._width - 40)
+        total_turns = max(0, len(self._history) - 1)
+        total_drones = len(snap.drone_locations)
+        delivered = snap.zone_counts.get(self._graph.end_zone_name, 0)
+        status = "PAUSED" if self._paused else "PLAYING"
+        status_text = (
+            f"Turn: {self._turn_idx}/{total_turns}   |   "
+            f"Delivered: {delivered}/{total_drones}   |   "
+            f"Speed: {self._speed:.1f}x [{status}]"
+        )
+        controls_text = (
+            "[SPACE] Pause  [LEFT/RIGHT] Step  [UP/DOWN] Speed  "
+            "[R] Restart  [ESC] Quit"
+        )
+        if self._width >= 1050:
+            hud_lines = [status_text + "   ||   " + controls_text]
+        elif self._width >= 750:
+            hud_lines = [status_text, controls_text]
+        else:
+            hud_lines = [
+                status_text,
+                "[SPACE] Pause  [LEFT/RIGHT] Step",
+                "[UP/DOWN] Speed  [R] Restart  [ESC] Quit",
+            ]
+        bar_h = 48 if len(hud_lines) == 1 else 22 + 20 * len(hud_lines)
         bar_x = (self._width - bar_w) // 2
         bar_y = self._height - bar_h - 18
 
@@ -421,31 +454,24 @@ class PygameVisualizer(BaseVisualizer):
             screen, self._palette.panel_bg, bar_rect, border_radius=10
         )
         pygame.draw.rect(
-            screen,
-            self._palette.panel_border,
-            bar_rect,
-            width=1,
-            border_radius=10,
+            screen, self._palette.panel_border, bar_rect,
+            width=1, border_radius=10,
         )
 
-        total_turns = max(0, len(self._history) - 1)
-        total_drones = len(snap.drone_locations)
-        delivered = snap.zone_counts.get(self._graph.end_zone_name, 0)
-        status = "PAUSED" if self._paused else "PLAYING"
-
         if self._font_small is not None:
-            status_text = (
-                f"Turn: {self._turn_idx}/{total_turns}   |   "
-                f"Delivered: {delivered}/{total_drones}   |   "
-                f"Speed: {self._speed:.1f}x [{status}]   ||   "
-                "[SPACE] Pause  [LEFT/RIGHT] Step  [UP/DOWN] Speed  "
-                "[R] Restart  [ESC] Quit"
-            )
-            hud_surf = self._font_small.render(
-                status_text, True, self._palette.text_primary
-            )
-            hud_rect = hud_surf.get_rect(center=bar_rect.center)
-            screen.blit(hud_surf, hud_rect)
+            line_h = self._font_small.get_linesize()
+            first_y = bar_rect.centery - (len(hud_lines) * line_h) // 2
+            for idx, line in enumerate(hud_lines):
+                hud_surf = self._font_small.render(
+                    line, True, self._palette.text_primary
+                )
+                hud_rect = hud_surf.get_rect(
+                    center=(
+                        bar_rect.centerx,
+                        first_y + idx * line_h + line_h // 2,
+                    )
+                )
+                screen.blit(hud_surf, hud_rect)
 
     def _handle_keydown(self, key: int) -> bool:
         """Process keyboard controls. Return False to quit."""
@@ -478,28 +504,34 @@ class PygameVisualizer(BaseVisualizer):
     def render(self) -> None:
         """Start the Pygame window loop and render the animated simulation."""
         if not self._history:
-            print("No simulation history to render.", file=sys.stderr)
-            return
+            raise VisualizationError("No simulation history to render.")
 
         try:
             pygame.init()
             display_info = pygame.display.Info()
             if display_info.current_w > 0 and display_info.current_h > 0:
-                self._width = int(display_info.current_w * 0.92)
-                self._height = int(display_info.current_h * 0.85)
+                self._width = min(
+                    self.DEFAULT_WIDTH,
+                    int(display_info.current_w * 0.90),
+                )
+                self._height = min(
+                    self.DEFAULT_HEIGHT,
+                    int(display_info.current_h * 0.75),
+                )
                 self._coords = self._compute_screen_coords()
 
             screen = pygame.display.set_mode(
-                (self._width, self._height)
+                (self._width, self._height), pygame.RESIZABLE
             )
             pygame.display.set_caption("Fly-in: Drone Routing Visualizer")
             clock = pygame.time.Clock()
             self._font_small = pygame.font.SysFont("consolas", 14)
             self._font_drone = pygame.font.SysFont("consolas", 11, bold=True)
-            self._font_title = pygame.font.SysFont("consolas", 16, bold=True)
         except pygame.error as exc:
-            print(f"Pygame initialization error: {exc}", file=sys.stderr)
-            return
+            pygame.quit()
+            raise VisualizationError(
+                f"Pygame initialization error: {exc}"
+            ) from exc
 
         try:
             running = True
@@ -532,7 +564,9 @@ class PygameVisualizer(BaseVisualizer):
                     min(self._turn_idx + 1, max_idx)
                 ]
                 self._draw_connections(screen, current_snap, next_snap)
-                self._draw_zones(screen, current_snap)
+                self._draw_zones(
+                    screen, current_snap, pygame.mouse.get_pos()
+                )
                 self._draw_drones(screen)
                 self._draw_top_legend(screen)
                 self._draw_bottom_hud(screen, current_snap)
