@@ -2,7 +2,6 @@
 
 import sys
 import os
-# import traceback
 
 from src.parsers import MapParser, ArgParser
 from src.models import Drone
@@ -19,17 +18,14 @@ def main() -> None:
 
     try:
         args = ArgParser.parse_args()
-        # print(f"Loading map from: {args.map}")
         parser = MapParser(args.map)
         graph, nb_drones = parser.parse_map()
 
         drones = Drone.create_fleet(nb_drones, graph.start_zone_name)
-        # print(f"drones => {drones}")
         cm = CollisionManager(graph)
         algorithms = CooperativeAStar(graph, cm)
 
         for drone in drones:
-            # print(f"drone => {drone}")
 
             path = algorithms.plan_route(
                 graph.start_zone_name, graph.end_zone_name
@@ -39,9 +35,7 @@ def main() -> None:
 
             drone.path = path
             cm.register_path(path)
-            # print(f"✅ {drone.id}: {path}")
 
-        # print("----------simulations-----------")
         controller = SimulationController(drones)
         controller.run()
 
@@ -57,12 +51,10 @@ def main() -> None:
     except FileNotFoundError as e:
         print(f"{RED}Error: Map file not found. {e}.{RESET}",
               file=sys.stderr)
-        # traceback.print_exc()
         sys.exit(1)
     except ValueError as e:
         print(f"{RED}Map Format Error: {e}.{RESET}",
               file=sys.stderr)
-        # traceback.print_exc()
         sys.exit(1)
     except VisualizationError as e:
         print(f"{RED}Visualization Error: {e}{RESET}", file=sys.stderr)
@@ -70,7 +62,6 @@ def main() -> None:
     except Exception as e:
         print(f"{RED}Unexpected Error: {e}{RESET}",
               file=sys.stderr)
-        # traceback.print_exc()
         sys.exit(1)
 
 

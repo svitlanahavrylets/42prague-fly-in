@@ -324,4 +324,4 @@ AI assistants (such as Codex / Gemini) were used during the development of this 
 * **Algorithm Comprehension & Design:** AI helped clarify Cooperative Space-Time A* pathfinding, including `(zone, turn)` states and a reverse BFS distance heuristic. 
 * **Debugging & Edge Cases:** Assisting in identifying and resolving edge cases across the codebase, such as infinite wait loops on disconnected graphs.
 * **Visuals & Rendering:** AI helped structure the `Pygame` visualization layer, including dynamic window resizing (`VIDEORESIZE`), smooth movement interpolation between turns.
-- **Documentation**: Structuring and drafting the initial layout of this `README.md` file and writing docstrings.
+* **Documentation**: Structuring and drafting the initial layout of this `README.md` file and writing docstrings.

@@ -118,5 +118,3 @@ def test_graph_creation_and_neighbors() -> None:
     assert graph.end_zone_name == "end"
     neighbors = graph.get_neighbors("hub1")
     assert [zone.name for zone, _, _ in neighbors] == ["start", "end"]
-
-# Graph.model_rebuild()

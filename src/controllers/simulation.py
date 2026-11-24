@@ -49,8 +49,7 @@ class SimulationController:
         max_turn = 0
         for drone in self.drones:
             if not drone.path:
-                raise ValueError(f"Path for Drone {drone.id!r} does not exist")
-            # print(f"drone in simulation => {drone.path}")
+                raise ValueError(f"Path for Drone {drone.id} does not exist")
 
             max_item = drone.path[-1][1]
             if max_item > max_turn:

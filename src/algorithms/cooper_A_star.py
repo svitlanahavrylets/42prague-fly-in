@@ -33,14 +33,11 @@ class CooperativeAStar:
         all other zones using simple BFS."""
         distances: dict[str, float] = {target_zone: 0.0}
         queue = deque([target_zone])
-        # print(f"queue => {queue}")
 
         while queue:
             current = queue.popleft()
-            # print(f"current => {current}")
 
             for neighbor, _, _ in self.graph.get_neighbors(current):
-                # print(f"neighbor => {neighbor}")
                 if neighbor.name not in distances:
                     distances[neighbor.name] = distances[current] + 1.0
                     queue.append(neighbor.name)
@@ -115,7 +112,6 @@ class CooperativeAStar:
         i = 0
         while open_set:
             i = i + 1
-            # print(f"open_set {i} turn =========> {open_set}")
             f_score, _, g_cost, turn, current_zone, path = heapq.heappop(
                 open_set)
 
